@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "start": "node server.ts",
-    "build": "echo 'No build required for serverless mock.'",
+    "build": "rm -rf dist && mkdir -p dist && cp index.html admin.html dashboard.html metadata.json dist/",
     "preview": "tsx server.ts",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit || true"
