@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Nội bộ - Đăng nhập</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-indigo-50 h-screen flex justify-center items-center font-sans text-slate-900">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-96 border border-slate-200">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Cổng Nhân Viên</h1>
+            <p class="text-sm text-slate-500 mt-2">Vui lòng đăng nhập để tiếp tục</p>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <!-- Username -->
+            <div>
+                <label for="username" class="block text-sm font-semibold text-slate-700 mb-1">Tên đăng nhập</label>
+                <input type="text" id="username" name="username" required 
+                    class="w-full px-4 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none placeholder-slate-400 bg-slate-50"
+                    placeholder="Nhập tên đăng nhập">
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-sm font-semibold text-slate-700 mb-1">Mật khẩu</label>
+                <input type="password" id="password" name="password" required 
+                    class="w-full px-4 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none placeholder-slate-400 bg-slate-50"
+                    placeholder="Nhập mật khẩu">
+            </div>
+
+            <!-- Errors & Messages -->
+            <div id="messageBox" class="text-sm font-medium hidden"></div>
+
+            <!-- Buttons -->
+            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2.5 rounded shadow-sm hover:bg-indigo-700 transition">
+                Đăng Nhập
+            </button>
+            <div class="text-center mt-4">
+                <button type="button" id="forgotBtn" class="text-xs text-indigo-600 hover:underline font-semibold">Quên mật khẩu?</button>
+            </div>
+        </form>
+        
+        <div class="mt-6 pt-4 border-t border-slate-200 text-[11px] text-slate-500 text-center uppercase tracking-wider">
+            <p>Admin mặc định: <code class="bg-slate-100 rounded px-1.5 py-0.5 text-indigo-700 normal-case font-bold">admin</code> / <code class="bg-slate-100 rounded px-1.5 py-0.5 text-indigo-700 normal-case font-bold">adminpassword</code></p>
+            <p class="mt-2"><a href="/admin.html" class="text-indigo-500 hover:text-indigo-600 hover:underline font-bold">Truy cập giao diện Quản trị</a></p>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const forgotBtn = document.getElementById('forgotBtn');
+        const messageBox = document.getElementById('messageBox');
+
+        function showMessage(msg, isSuccess = false) {
+            messageBox.textContent = msg;
+            messageBox.className = `text-sm font-medium p-3 rounded-lg block ${isSuccess ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`;
+        }
+
+        // Logic Đăng nhập
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/.netlify/functions/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    // Lưu session vao LocalStorage
+                    localStorage.setItem('internalSessionUser', JSON.stringify(data.user));
+                    showMessage('Đăng nhập thành công! Đang chuyển hướng...', true);
+                    
+                    // Route dựa trên Role
+                    setTimeout(() => {
+                        if(data.user.role === 'admin') {
+                            window.location.href = '/admin.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    }, 1000);
+                } else {
+                    showMessage(data.message || 'Đăng nhập thất bại.');
+                }
+            } catch (err) {
+                showMessage('Lỗi kết nối máy chủ!');
+                console.error(err);
+            }
+        });
+
+        // Logic Quên mật khẩu (Gửi alert xin Admin)
+        forgotBtn.addEventListener('click', async () => {
+            const username = document.getElementById('username').value;
+            if (!username) {
+                showMessage('Vui lòng nhập tên đăng nhập để yêu cầu reset mật khẩu.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/.netlify/functions/manage-users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'request-reset', username })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showMessage('Đã gửi yêu cầu đổi mật khẩu cho tài khoản này đến Admin!', true);
+                } else {
+                    showMessage(data.message || 'Lỗi gửi yêu cầu.');
+                }
+            } catch (err) {
+                showMessage('Lỗi kết nối!');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Internal Account Management",
+  "description": "Admin & Staff account management system using Netlify Functions and Blobs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

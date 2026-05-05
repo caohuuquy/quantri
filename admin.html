@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Quản lý Tài khoản</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-900 overflow-hidden">
+    
+    <!-- Admin Login Form Overlay -->
+    <div id="adminLoginContainer" class="flex-1 flex justify-center items-center h-full w-full bg-slate-50 absolute inset-0 z-50 hidden">
+        <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 w-96">
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight text-center mb-6">Admin Login</h2>
+            <form id="adminLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Username</label>
+                    <input type="text" id="adminLoginUsername" required class="w-full px-4 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" placeholder="admin">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="adminLoginPassword" required class="w-full px-4 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50" placeholder="adminpassword">
+                </div>
+                <div id="adminLoginMsg" class="text-sm font-medium hidden"></div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded shadow-sm transition">Đăng Nhập Quản Trị</button>
+            </form>
+            <div class="mt-4 text-center">
+                <a href="/index.html" class="text-xs text-indigo-600 hover:underline font-semibold">Quay lại Cổng Nhân Viên</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboardContainer" class="hidden flex-1 flex-col overflow-hidden h-full">
+        <header class="bg-indigo-900 text-white px-6 py-4 flex justify-between items-center shrink-0 shadow-md">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-500 p-2 rounded-lg">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">Netlify Accounts Manager <span class="text-indigo-300 font-normal text-sm ml-2 uppercase tracking-widest hidden md:inline">Blobs Storage v1.0</span></h1>
+        </div>
+        <div class="flex items-center gap-4 text-sm">
+            <span id="adminName" class="font-mono"></span>
+            <button onclick="logout()" class="bg-indigo-800 hover:bg-indigo-700 border border-indigo-700 px-4 py-1.5 rounded-full text-sm font-medium transition shadow-sm">Đăng xuất</button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Cột Form Thêm tài khoản -->
+        <aside class="w-80 bg-white border-r border-slate-200 p-6 flex flex-col gap-6 overflow-y-auto shrink-0 hidden md:flex">
+            <div>
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Thêm Tài Khoản Mới</h2>
+                <form id="addUserForm" class="space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-600 px-1">Họ và Tên</label>
+                        <input type="text" id="addFullName" required class="w-full text-sm border border-slate-300 rounded px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-600 px-1">Username</label>
+                        <input type="text" id="addUsername" required class="w-full text-sm border border-slate-300 rounded px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-600 px-1">Mật khẩu (mặc định: 123456)</label>
+                        <input type="password" id="addPassword" class="w-full text-sm border border-slate-300 rounded px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Bỏ trống thì là 123456">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-600 px-1">Chức vụ (Role)</label>
+                        <select id="addRole" class="w-full text-sm border border-slate-300 rounded px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+                            <option value="staff">Nhân viên (Staff)</option>
+                            <option value="admin">Quản trị viên (Admin)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2.5 rounded shadow-sm transition-colors mt-2">Tạo Tài Khoản</button>
+                </form>
+            </div>
+            <div class="mt-auto pt-4 bg-transparent">
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                    <h3 class="text-xs font-bold text-indigo-700 uppercase mb-2">Preview Login Form</h3>
+                    <div class="bg-white border border-indigo-200 rounded p-4 scale-90 shadow-inner origin-top pointer-events-none">
+                        <div class="text-center mb-3">
+                            <div class="w-8 h-8 bg-indigo-600 mx-auto rounded-full mb-1"></div>
+                            <div class="h-2 w-16 bg-slate-200 mx-auto rounded"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-6 bg-slate-100 rounded"></div>
+                            <div class="h-6 bg-slate-100 rounded"></div>
+                            <div class="h-8 bg-indigo-600 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Cột Danh sách tài khoản -->
+        <section class="flex-1 p-4 md:p-8 flex flex-col gap-6 overflow-hidden">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Tổng số</div>
+                    <div id="statTotal" class="text-2xl font-bold">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="text-indigo-600 text-xs font-bold uppercase mb-1">Admin</div>
+                    <div id="statAdmin" class="text-2xl font-bold">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="text-emerald-600 text-xs font-bold uppercase mb-1">Nhân viên</div>
+                    <div id="statStaff" class="text-2xl font-bold">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="text-orange-500 text-xs font-bold uppercase mb-1">Reset Cần Duyệt</div>
+                    <div id="statReset" class="text-2xl font-bold">0</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 flex-1 flex flex-col overflow-hidden shadow-lg">
+                <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center shrink-0">
+                    <h2 class="font-bold text-slate-700">Danh Sách Tài Khoản</h2>
+                </div>
+                
+                <div class="overflow-auto flex-1">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead class="sticky top-0 z-10 w-full bg-slate-50 shadow-sm">
+                            <tr class="border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500">
+                                <th class="px-6 py-3 font-semibold">Tên đầy đủ</th>
+                                <th class="px-6 py-3 font-semibold">Tên đăng nhập</th>
+                                <th class="px-6 py-3 font-semibold">Vai trò</th>
+                                <th class="px-6 py-3 font-semibold text-right">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="text-sm divide-y divide-slate-100">
+                            <tr><td colspan="4" class="p-6 text-center text-slate-400">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 px-6 py-2 text-[10px] hidden md:flex justify-between text-slate-400 shrink-0">
+        <div class="flex gap-4">
+            <span>Store: Netlify Blobs (Internal)</span>
+            <span>Endpoint: /.netlify/functions/manage-users</span>
+        </div>
+        <div class="font-mono uppercase">
+            System Status: Optimized • Secure • Serverless
+        </div>
+    </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const adminLoginContainer = document.getElementById('adminLoginContainer');
+        const adminDashboardContainer = document.getElementById('adminDashboardContainer');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+
+        // Check session
+        const session = JSON.parse(localStorage.getItem('internalSessionUser') || 'null');
+        if (!session || session.role !== 'admin') {
+            adminLoginContainer.classList.remove('hidden');
+        } else {
+            adminDashboardContainer.classList.remove('hidden');
+            adminDashboardContainer.classList.add('flex'); // Because it's flex-col
+            document.getElementById('adminName').textContent = `Hi, ${session.fullName}`;
+            fetchUsers();
+        }
+
+        // Admin Login Handle
+        adminLoginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('adminLoginUsername').value;
+            const password = document.getElementById('adminLoginPassword').value;
+            const msgBox = document.getElementById('adminLoginMsg');
+
+            try {
+                const res = await fetch('/.netlify/functions/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    if (data.user.role === 'admin') {
+                        localStorage.setItem('internalSessionUser', JSON.stringify(data.user));
+                        adminLoginContainer.classList.add('hidden');
+                        adminDashboardContainer.classList.remove('hidden');
+                        adminDashboardContainer.classList.add('flex');
+                        document.getElementById('adminName').textContent = `Hi, ${data.user.fullName}`;
+                        fetchUsers();
+                    } else {
+                        msgBox.textContent = 'Lỗi: Tài khoản này không có quyền Admin.';
+                        msgBox.className = 'text-sm font-medium p-3 rounded block bg-red-50 text-red-700 mt-3';
+                    }
+                } else {
+                    msgBox.textContent = data.message || 'Đăng nhập thất bại.';
+                    msgBox.className = 'text-sm font-medium p-3 rounded block bg-red-50 text-red-700 mt-3';
+                }
+            } catch (err) {
+                msgBox.textContent = 'Lỗi kết nối máy chủ!';
+                msgBox.className = 'text-sm font-medium p-3 rounded block bg-red-50 text-red-700 mt-3';
+            }
+        });
+
+        // Fetch users
+        async function fetchUsers() {
+            try {
+                const res = await fetch('/.netlify/functions/manage-users');
+                const users = await res.json();
+                renderUsers(users);
+            } catch (err) {
+                console.error("Lỗi khi lấy ds user:", err);
+            }
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            let admins = 0, staffs = 0, resets = 0;
+
+            users.forEach(u => {
+                if(u.role === 'admin') admins++;
+                else staffs++;
+                if(u.needsReset) resets++;
+
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-slate-50 transition-colors ${u.needsReset ? 'bg-orange-50/50 hover:bg-orange-100/50' : ''}`;
+                
+                const roleBadge = u.role === 'admin' 
+                    ? '<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Admin</span>'
+                    : '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Staff</span>';
+                
+                const resetBadge = u.needsReset 
+                    ? `<div class="mt-1 flex items-center gap-1.5 text-[10px] text-orange-600 font-medium uppercase tracking-wide animate-pulse">Chờ Reset MK</div>` 
+                    : '';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium">${u.fullName}</td>
+                    <td class="px-6 py-4 font-mono text-xs text-slate-600 flex flex-col items-start gap-0.5">
+                       <span>${u.username}</span>
+                       ${resetBadge}
+                    </td>
+                    <td class="px-6 py-4">${roleBadge}</td>
+                    <td class="px-6 py-4 text-right">
+                        ${u.needsReset ? 
+                            `<button onclick="resetPassword('${u.username}')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm transition">Phê duyệt Reset</button>` :
+                            `<button onclick="resetPassword('${u.username}')" class="text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded text-xs font-bold transition border border-transparent hover:border-indigo-200">Reset Pwd</button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('statTotal').innerText = users.length;
+            document.getElementById('statAdmin').innerText = admins;
+            document.getElementById('statStaff').innerText = staffs;
+            document.getElementById('statReset').innerText = resets;
+        }
+
+        // Add user
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('addFullName').value;
+            const username = document.getElementById('addUsername').value;
+            const password = document.getElementById('addPassword').value;
+            const role = document.getElementById('addRole').value;
+
+            try {
+                const res = await fetch('/.netlify/functions/manage-users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, username, password, role })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert('Thêm tài khoản thành công!');
+                    e.target.reset();
+                    fetchUsers();
+                } else {
+                    alert(data.message || 'Lỗi thêm tài khoản.');
+                }
+            } catch (err) {
+                alert('Có lỗi xảy ra.');
+            }
+        });
+
+        // Reset password
+        async function resetPassword(username) {
+            if(!confirm(`Xác nhận đổi mật khẩu cho tài khoản ${username} về mặt định '123456'?`)) return;
+
+            try {
+                const res = await fetch('/.netlify/functions/manage-users', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'reset-password', username })
+                });
+                const data = await res.json();
+                
+                if(res.ok) {
+                    alert(`Reset mật khẩu thành công: ${username} -> 123456`);
+                    fetchUsers();
+                } else {
+                    alert(data.message || 'Lỗi reset.');
+                }
+            } catch (err) {
+                alert('Có lỗi xảy ra.');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('internalSessionUser');
+            adminDashboardContainer.classList.add('hidden');
+            adminDashboardContainer.classList.remove('flex');
+            adminLoginContainer.classList.remove('hidden');
+            document.getElementById('adminLoginForm').reset();
+            document.getElementById('adminLoginMsg').classList.add('hidden');
+        }
+
+        // Init
+        // Note: fetchUsers() is now called after successful session validation.
+    </script>
+</body>
+</html>
